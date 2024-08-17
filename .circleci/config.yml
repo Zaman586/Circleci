@@ -3,43 +3,23 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: circleci/node:14.17.0
+      - image: circleci/python:3.8
     steps:
       - checkout
       - run:
-          name: Build Step
-          command: echo "Building the project..."
-
-  test:
-    docker:
-      - image: circleci/node:14.17.0
-    steps:
-      - checkout
+          name: Build Project
+          command: echo "Building the project"
       - run:
-          name: Test Step
+          name: Deploy Project
           command: |
-            echo "Running tests..."
-            if [ -f index.html ]; then echo "index.html exists"; else exit 1; fi
-
-  deploy:
-    docker:
-      - image: circleci/node:14.17.0
-    steps:
-      - checkout
+            echo "Deploying the project"
+            rsync -avz -e "ssh -p 22" ./project-directory/ username@103.151.111.182:/path/to/deploy/
       - run:
-          name: Deploy Step
-          command: |
-            echo "Deploying the project to the server..."
-            scp -P 8085 ./index.html root@103.151.111.182:/var/www/html/
+          name: Run Tests
+          command: echo "Running tests"
 
 workflows:
   version: 2
-  build_test_deploy:
+  build_deploy_test:
     jobs:
       - build
-      - test:
-          requires:
-            - build
-      - deploy:
-          requires:
-            - test
