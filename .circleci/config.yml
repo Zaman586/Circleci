@@ -3,23 +3,39 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: circleci/python:3.8
+      - image: circleci/node:14.17
     steps:
       - checkout
       - run:
-          name: Build Project
+          name: Build the Project
           command: echo "Building the project"
-      - run:
-          name: Deploy Project
-          command: |
-            echo "Deploying the project"
-            rsync -avz -e "ssh -p 22" ./project-directory/ username@103.151.111.182:/path/to/deploy/
+
+  test:
+    docker:
+      - image: circleci/node:14.17
+    steps:
+      - checkout
       - run:
           name: Run Tests
           command: echo "Running tests"
 
+  deploy:
+    docker:
+      - image: circleci/node:14.17
+    steps:
+      - checkout
+      - run:
+          name: Deploy the Project
+          command: echo "Deploying the project"
+
 workflows:
   version: 2
-  build_deploy_test:
+  build_test_deploy:
     jobs:
       - build
+      - test:
+          requires:
+            - build
+      - deploy:
+          requires:
+            - test
